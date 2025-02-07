@@ -1,0 +1,95 @@
+/* Categories Section */
+.categories {
+  padding: 40px 10%;
+  text-align: center;
+  background-color: #f8f9fc; /* Light background */
+}
+
+/* Categories Grid */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+  gap: 20px; /* Space between cards */
+  justify-content: center;
+  align-items: stretch;
+}
+
+/* Category Card */
+.category-card {
+  background-color: #fff; 
+  height: 30%; 
+  width: 20%;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Category Icon */
+.category-icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
+/* Category Content */
+.category-content h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.category-content p {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+/* Stats Section */
+.category-stats {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* Tag Section */
+.category-tag {
+  font-size: 13px;
+  color: #007bff;
+  background-color: #e6f3ff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+/* External Link & Favorite Icons */
+.category-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.category-actions a,
+.category-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.category-actions a:hover,
+.category-actions button:hover {
+  color: #007bff;
+}
