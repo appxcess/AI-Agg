@@ -1,4 +1,6 @@
-.app-container {
+@import "tailwindcss"; 
+
+/* .app-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,4 +19,4 @@
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-}
+} */

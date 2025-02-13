@@ -1,38 +1,69 @@
-import React from 'react';
-import '../assets/styles/TextWritingSection.css';
+import React, { useState } from "react";
 
 function TextWritingSection() {
+  const [activeTab, setActiveTab] = useState("Today");
+
+  const tabs = [
+    "Today",
+    "New",
+    "Most Saved",
+    "Most Used",
+    "Browser Extension",
+    "Apps",
+    "Discord of AI",
+    "AI for Jobs",
+    "AI for Capabilities",
+  ];
+
+  const categories = [
+    "Text & Writing",
+    "Image",
+    "Video",
+    "Code & IT",
+    "Voice",
+    "Business",
+    "Marketing",
+    "AI Detector",
+    "Chatbot",
+    "Design & Art",
+    "Life Assistant",
+    "3D",
+    "Education",
+    "Prompt",
+    "Productivity",
+    "More +",
+  ];
+
   return (
-    <section className="text-writing-section">
-      <div className="tabs">
-        <span className="active">Today</span>
-        <span>New</span>
-        <span>Most Saved</span>
-        <span>Most Used</span>
-        <span>Browser Extension</span>
-        <span>Apps</span>
-        <span>Discord of AI</span>
-        <span>AI for Jobs</span>
-        <span>AI for Capabilities</span>
+    <section className="px-3 py-6 text-center">
+      {/* Tabs Section */}
+      <div className="flex justify-center gap-2 flex-wrap mb-4">
+        {tabs.map((tab) => (
+          <span
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-3 py-2 rounded-full border text-xs cursor-pointer transition-all ${
+              activeTab === tab
+                ? "bg-blue-500 text-white border-blue-500"
+                : "bg-gray-200 text-gray-800 border-gray-300 hover:bg-blue-500 hover:text-white hover:border-blue-500 text-center"
+            }`}
+          >
+            {tab}
+          </span>
+        ))}
       </div>
-      <div className="categories-grid">
-        <div className="category-card">Text & Writing</div>
-        <div className="category-card">Image</div>
-        <div className="category-card">Video</div>
-        <div className="category-card">Code & IT</div>
-        <div className="category-card">Voice</div>
-        <div className="category-card">Business</div>
-        <div className="category-card">Marketing</div>
-        <div className="category-card">AI Detector</div>
-        <div className="category-card">Chatbot</div>
-        <div className="category-card">Design & Art</div>
-        <div className="category-card">Life Assistant</div>
-        <div className="category-card">3D</div>
-        <div className="category-card">Education</div>
-        <div className="category-card">Prompt</div>
-        <div className="category-card">Productivity</div>
-        <div className="category-card">More +</div>
-      </div>
+
+      <div className="flex justify-center items-center gap-2 flex-wrap overflow-x-auto pb-2 scrollbar-hide w-full text-center">
+  {categories.map((category) => (
+    <div
+      key={category}
+      className="px-3 py-2 bg-gray-200 text-gray-800 text-sm border border-gray-300 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 flex justify-center items-center"
+    >
+      {category}
+    </div>
+  ))}
+</div>
+
     </section>
   );
 }
