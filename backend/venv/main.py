@@ -1,57 +1,73 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime 
-
+from pydantic import BaseModel
+from bson import ObjectId
+from datetime import datetime
 
 app = FastAPI()
 
-# Add CORS middleware at the very beginning
+# ✅ Configure CORS correctly
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all origins for testing
-    allow_credentials=False,  # Set to False when allow_origins=["*"]
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["http://localhost:5173"],  # Allow frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
 
-# MongoDB connection
+# ✅ MongoDB Connection
 MONGO_URL = "mongodb://localhost:27017"
 client = AsyncIOMotorClient(MONGO_URL)
 db = client.toolify_db
 
+# ✅ Define Pydantic model for tool submission
 class ToolSubmission(BaseModel):
     name: str
     website_url: str
     amount_paid: float
 
+# ✅ Define Pydantic model for tools, with ObjectId handling
+class Tool(BaseModel):
+    name: str
+    website_url: str
+    amount_paid: float
+    created_at: datetime
+    _id: str  # Convert ObjectId to string
+
+    class Config:
+        # This converts ObjectId to string when serializing
+        json_encoders = {
+            ObjectId: str
+        }
+
+# ✅ POST route to submit a tool
 @app.post("/submit")
 async def submit_tool(submission: ToolSubmission):
     try:
-        # Add timestamp to the submission
         submission_dict = submission.dict()
         submission_dict["created_at"] = datetime.utcnow()
-        
-        # Insert into MongoDB
+
         result = await db.submissions.insert_one(submission_dict)
-        
-        return {
-            "status": "success",
-            "message": "Tool submitted successfully",
-            "submission_id": str(result.inserted_id)
-        }
-            
+
+        return {"status": "success", "message": "Tool submitted", "submission_id": str(result.inserted_id)}
+
     except Exception as e:
-        print(f"Error submitting tool: {str(e)}")  # Add logging
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to save submission: {str(e)}"
-        ) 
-    
+        raise HTTPException(status_code=500, detail=f"Submission failed: {str(e)}")
 
+# ✅ GET route to fetch tools
+@app.get("/tools")
+async def get_tools():
+    try:
+        tools_cursor = db.submissions.find()  # Fetch from MongoDB
+        tools = await tools_cursor.to_list(100)  # Convert cursor to list
+        
+        # Return tools in Pydantic model format
+        return [Tool(**tool) for tool in tools]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch tools: {str(e)}")
 
-# Test endpoint
+# ✅ Health check endpoint
 @app.get("/")
 async def root():
     return {"message": "API is running"}

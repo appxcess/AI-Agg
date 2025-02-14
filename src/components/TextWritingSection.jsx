@@ -1,71 +1,82 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { CalendarDays, Plus, Bookmark, Clock, Chrome, AppWindow, MessageCircle, Briefcase, Eye, Twitter } from 'lucide-react';
 
-function TextWritingSection() {
+const CategoryNavigation = () => {
   const [activeTab, setActiveTab] = useState("Today");
 
+  // Define tabs with their icons
   const tabs = [
-    "Today",
-    "New",
-    "Most Saved",
-    "Most Used",
-    "Browser Extension",
-    "Apps",
-    "Discord of AI",
-    "AI for Jobs",
-    "AI for Capabilities",
+    { id: "Today", icon: <CalendarDays className="w-4 h-4" />, label: "Today" },
+    { id: "New", icon: <Plus className="w-4 h-4" />, label: "New" },
+    { id: "Most Saved", icon: <Bookmark className="w-4 h-4" />, label: "Most Saved" },
+    { id: "Most Used", icon: <Clock className="w-4 h-4" />, label: "Most Used" },
+    { id: "Browser Extension", icon: <Chrome className="w-4 h-4" />, label: "Browser Extension" },
+    { id: "Apps", icon: <AppWindow className="w-4 h-4" />, label: "Apps" },
+    { id: "Discord of AI", icon: <MessageCircle className="w-4 h-4" />, label: "Discord of AI" },
+    { id: "AI for Jobs", icon: <Briefcase className="w-4 h-4" />, label: "AI for Jobs" },
+    { id: "AI for Capabilities", icon: <Eye className="w-4 h-4" />, label: "AI for Capabilities" },
   ];
 
   const categories = [
-    "Text & Writing",
+    "Text&Writing",
     "Image",
     "Video",
-    "Code & IT",
+    "Code&IT",
     "Voice",
     "Business",
     "Marketing",
     "AI Detector",
     "Chatbot",
-    "Design & Art",
+    "Design&Art",
     "Life Assistant",
     "3D",
     "Education",
     "Prompt",
     "Productivity",
-    "More +",
+    "More +"
   ];
 
   return (
-    <section className="px-3 py-6 text-center">
-      {/* Tabs Section */}
-      <div className="flex justify-center gap-2 flex-wrap mb-4">
-        {tabs.map((tab) => (
-          <span
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-3 py-2 rounded-full border text-xs cursor-pointer transition-all ${
-              activeTab === tab
-                ? "bg-blue-500 text-white border-blue-500"
-                : "bg-gray-200 text-gray-800 border-gray-300 hover:bg-blue-500 hover:text-white hover:border-blue-500 text-center"
-            }`}
-          >
-            {tab}
-          </span>
-        ))}
+    <div className="w-full px-4 py-3 space-y-4">
+      {/* Top Navigation with Icons */}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex gap-2 overflow-x-auto pb-2 flex-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-all ${
+                activeTab === tab.id
+                  ? "bg-violet-600 text-white"
+                  : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        
+        {/* Twitter Handle */}
+        <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full text-sm text-gray-700">
+          <Twitter className="w-4 h-4 text-blue-400" />
+          @toolify
+        </div>
       </div>
 
-      <div className="flex justify-center items-center gap-2 flex-wrap overflow-x-auto pb-2 scrollbar-hide w-full text-center">
-  {categories.map((category) => (
-    <div
-      key={category}
-      className="px-3 py-2 bg-gray-200 text-gray-800 text-sm border border-gray-300 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 flex justify-center items-center"
-    >
-      {category}
+      {/* Categories */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {categories.map((category) => (
+          <button
+            key={category}
+            className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-full text-sm whitespace-nowrap border border-gray-200"
+          >
+            {category}
+          </button>
+        ))}
+      </div>
     </div>
-  ))}
-</div>
-
-    </section>
   );
-}
+};
 
-export default TextWritingSection;
+export default CategoryNavigation;

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.4",
+    "formidable": "^3.5.2",
     "i18next": "^24.2.2",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",

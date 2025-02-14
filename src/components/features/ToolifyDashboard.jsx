@@ -6,6 +6,10 @@ import ActionCard from './ActionCard';
 import SubmitAIForm from './SubmitAIForm';
 import AdvertiseForm from './AdvertiseForm';
 import GuestPostForm from './GuestPostForm';
+import UpdateForm from './UpdateForm';
+import SubmitGPT from './submitGPT';
+import BusinessPage from './BusinessPage';
+
 
 const ToolifyDashboard = () => {
   const [activeAction, setActiveAction] = useState('submit-ai');
@@ -55,6 +59,12 @@ const ToolifyDashboard = () => {
         return <SubmitAIForm />;
       case 'guest-posts':
         return <GuestPostForm />;
+      case 'update-ai':
+        return <UpdateForm/>;
+        case 'submit-gpt':
+        return <SubmitGPT/>;
+      case 'more-business':
+        return <BusinessPage/>
       default:
         return <div className="text-center text-gray-600 py-8">Form coming soon...</div>;
     }
