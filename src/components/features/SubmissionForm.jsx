@@ -1,73 +1,119 @@
 import React, { useState } from 'react';
-import GenerationOption from './GenerationOption';
+import PropTypes from 'prop-types'; // Import PropTypes
+import { useNavigate } from 'react-router-dom';
+
+// Define prop-types for GenerationOption
+const GenerationOption = ({ title, description, isNew = false }) => (
+  <div className="p-4">
+    <div className="flex justify-between items-start">
+      <h3 className="font-bold">{title}</h3>
+      {isNew && (
+        <span className="px-2 py-1 text-xs bg-purple-100 text-purple-600 rounded">New</span>
+      )}
+    </div>
+    <p className="text-gray-600">{description}</p>
+  </div>
+);
+
+// Add prop-types validation for GenerationOption
+GenerationOption.propTypes = {
+  title: PropTypes.string.isRequired, // Validate 'title' as a required string
+  description: PropTypes.string.isRequired, // Validate 'description' as a required string
+  isNew: PropTypes.bool, // Validate 'isNew' as an optional boolean
+};
 
 const SubmissionForm = () => {
-  const [name, setName] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    websiteUrl: "",
+    generationType: "auto"
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [submitStatus, setSubmitStatus] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setError(""); // Clear error when user makes changes
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      return false;
+    }
+    if (!formData.websiteUrl.trim()) {
+      setError("Website URL is required");
+      return false;
+    }
+    try {
+      new URL(formData.websiteUrl);
+      return true;
+    } catch {
+      setError("Please enter a valid URL");
+      return false;
+    }
+  };
 
   const handleSubmit = async () => {
     setError("");
+    setSubmitStatus(null);
     setIsSubmitting(true);
-
-    // Validation
-    if (!name.trim()) {
-      setError("Name is required");
+  
+    if (!validateForm()) {
       setIsSubmitting(false);
       return;
     }
-    if (!websiteUrl.trim()) {
-      setError("Website URL is required");
-      setIsSubmitting(false);
+  
+    if (formData.generationType === "manual") {
+      navigate('/Domyself', {
+        state: {
+          formData: {
+            name: formData.name.trim(),
+            websiteUrl: formData.websiteUrl.trim(),
+            selectedOption: formData.generationType
+          }
+        }
+      });
       return;
     }
-
-    try {
-      new URL(websiteUrl);
-    } catch {
-      setError("Please enter a valid URL");
-      setIsSubmitting(false);
-      return;
-    }
-
+  
     const payload = {
-      name: name.trim(),
-      website_url: websiteUrl.trim(),
-      amount_paid: 99
+      name: formData.name.trim(),
+      website_url: formData.websiteUrl.trim(),
+      amount_paid: 99,
+      generate_content: formData.generationType === "auto",
+      submission_type: formData.generationType
     };
-
+  
     try {
-      console.log('Submitting payload:', payload); // Debug log
-
       const response = await fetch("http://127.0.0.1:8000/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-
-      console.log('Response status:', response.status); // Debug log
-
-      const data = await response.json();
-      console.log('Response data:', data); // Debug log
-
+  
       if (!response.ok) {
-        throw new Error(data.detail || 'Submission failed');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Submission failed');
       }
-
-      // Success
-      alert("Tool submitted successfully!");
-      setName("");
-      setWebsiteUrl("");
-      
+  
+      const data = await response.json();
+      setSubmitStatus("success");
+      alert(`Tool submitted successfully! Submission ID: ${data.submission_id}`);
+      setFormData({ name: "", websiteUrl: "", generationType: "auto" });
+  
     } catch (error) {
       console.error('Submission error:', error);
-      setError(
-        error.message === 'Failed to fetch'
-          ? 'Unable to connect to the server. Please check if the server is running.'
-          : `Error: ${error.message}`
+      setSubmitStatus("error");
+      setError(error.message === 'Failed to fetch'
+        ? 'Unable to connect to the server. Please check if the server is running.'
+        : `Error: ${error.message}`
       );
     } finally {
       setIsSubmitting(false);
@@ -82,6 +128,12 @@ const SubmissionForm = () => {
             {error}
           </div>
         )}
+        
+        {submitStatus === "success" && (
+          <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            Submission successful!
+          </div>
+        )}
 
         <div>
           <label className="block mb-2">
@@ -91,9 +143,10 @@ const SubmissionForm = () => {
           </label>
           <input
             type="text"
+            name="name"
             placeholder="Copy AI"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={handleInputChange}
             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
             required
           />
@@ -107,14 +160,15 @@ const SubmissionForm = () => {
           </label>
           <input
             type="url"
+            name="websiteUrl"
             placeholder='Please enter the tool url, such as: "https://www.copy.ai"'
-            value={websiteUrl}
-            onChange={(e) => setWebsiteUrl(e.target.value)}
+            value={formData.websiteUrl}
+            onChange={handleInputChange}
             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
             required
           />
         </div>
-        
+
         <div>
           <label className="block mb-2">
             <span className="text-gray-700">
@@ -122,15 +176,28 @@ const SubmissionForm = () => {
             </span>
           </label>
           <div className="space-y-3">
-            <GenerationOption
-              title="Generated by Toolify"
-              description="All content and translations are generated by Toolify AI"
-            />
-            <GenerationOption
-              title="Do it myself"
-              description="Provide tool information myself in English only, translated by Toolify AI"
-              isNew
-            />
+            <div
+              onClick={() => setFormData(prev => ({ ...prev, generationType: "auto" }))}
+              className={`cursor-pointer border rounded-lg transition-all duration-200 
+                ${formData.generationType === "auto" ? 'border-purple-500 bg-purple-100' : 'border-gray-300'}`}
+            >
+              <GenerationOption
+                title="Generated by Toolify"
+                description="All content and translations are generated by Toolify AI"
+              />
+            </div>
+
+            <div
+              onClick={() => setFormData(prev => ({ ...prev, generationType: "manual" }))}
+              className={`cursor-pointer border rounded-lg transition-all duration-200 
+                ${formData.generationType === "manual" ? 'border-purple-500 bg-purple-100' : 'border-gray-300'}`}
+            >
+              <GenerationOption
+                title="Do it myself"
+                description="Provide tool information myself in English only, translated by Toolify AI"
+                isNew
+              />
+            </div>
           </div>
         </div>
 

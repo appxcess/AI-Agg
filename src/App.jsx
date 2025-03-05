@@ -8,7 +8,9 @@ import ToolPage from "./components/ToolPage";
 import SubmitAdvertise from "./components/submit_advertise";
 import Ranking from "./components/Ranking";
 import SocialListen from "./components/SocialListening";
-import AllModels from "./components/All_models";
+import AllModels from "./components/All_models"; 
+import TooForm from "./components/features/TooForm"; 
+import Domyself from "./components/features/DoMyself";
 
 function App() {
   return (
@@ -21,7 +23,9 @@ function App() {
           <Route path="/submit_advertise" element={<SubmitAdvertise />} />
           <Route path="/Ranking" element={<Ranking/>}/> 
           <Route path="/SocialListening" element={<SocialListen/>}/>
-          <Route path="/All_models" element={<AllModels/>}/>
+          <Route path="/All_models" element={<AllModels/>}/> 
+          <Route path="/TooForm" element={<TooForm/>}/> 
+          <Route path="/DoMyself" element={<Domyself/>}/>
         </Routes>
       </div>
     </Router>

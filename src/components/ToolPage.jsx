@@ -1,26 +1,38 @@
-import React, { useState } from 'react';
-import { Star, ExternalLink, Mail, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, ExternalLink, Mail, Share2, Flame, TrendingUp } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
-const ToolPage = ({ toolId = 1 }) => {
+const ToolPage = () => {
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("product-info");
+  const [tool, setTool] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample data - in a real app, this would come from props or an API
-  const tool = {
-    id: 1,
-    image: "/api/placeholder/300/200",
-    title: "SnapCut.AI",
-    description: "AI astrology site for personalized Bazi and zodiac readings.",
-    rating: 4,
-    reviews: 0,
-    saved: 0,
-    addedOn: "Feb 09 2025",
-    monthlyVisitors: "--",
-    category: ["Website", "Free", "Other"],
-    url: "https://snapcut.ai",
-  };
+  useEffect(() => {
+    const fetchTool = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/tools`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tool data');
+        }
+        const tools = await response.json();
+        const selectedTool = tools.find(t => t._id === id);
+        setTool(selectedTool);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTool();
+  }, [id]);
 
   const handleOpenSite = () => {
-    window.open(tool.url, "_blank", "noopener,noreferrer");
+    if (tool?.website_url) {
+      window.open(tool.website_url, "_blank", "noopener,noreferrer");
+    }
   };
 
   const tabs = [
@@ -32,16 +44,45 @@ const ToolPage = ({ toolId = 1 }) => {
     { id: "alternatives", label: "Alternatives" },
   ];
 
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-12 bg-gray-200 rounded w-1/2 mb-6"></div>
+          <div className="h-64 bg-gray-200 rounded mb-6"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!tool) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
+          Tool not found
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {/* Breadcrumb */}
       <div className="text-sm mb-6">
-        <span className="text-gray-600">Home &gt; Other &gt; {tool.title}</span>
+        <span className="text-gray-600">Home &gt; {tool.category || 'AI Tool'} &gt; {tool.name}</span>
       </div>
-
-      {/* Header Section */}
       <div className="flex justify-between items-start mb-6">
-        <h1 className="text-3xl font-bold">{tool.title}</h1>
+        <h1 className="text-3xl font-bold">{tool.name}</h1>
         <button
           onClick={handleOpenSite}
           className="bg-violet-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-violet-700"
@@ -49,60 +90,52 @@ const ToolPage = ({ toolId = 1 }) => {
           Open site <ExternalLink className="w-4 h-4" />
         </button>
       </div>
-
-      {/* Rating Section */}
       <div className="flex items-center gap-4 mb-6">
-        <div className="flex items-center">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`w-5 h-5 ${i < tool.rating ? 'text-violet-600 fill-violet-600' : 'text-gray-300'}`}
-            />
-          ))}
-          <span className="ml-2 text-violet-600">{tool.rating}</span>
+        <div className="flex items-center gap-2 text-gray-600">
+          <Flame className="w-5 h-5" />
+          <span>0 views</span>
         </div>
-        <span className="text-gray-600">{tool.reviews} Reviews</span>
-        <span className="text-gray-600">{tool.saved} Saved</span>
+        <div className="flex items-center gap-2 text-gray-600">
+          <TrendingUp className="w-5 h-5" />
+          <span>0%</span>
+        </div>
       </div>
-
-      {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
-          {/* Info Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div className="p-6">
               <div className="space-y-4">
                 <div>
                   <span className="font-semibold">Introduction:</span>
-                  <p>{tool.description}</p>
+                  <p>{tool.content_text || 'No description available'}</p>
                 </div>
                 <div>
                   <span className="font-semibold">Added on:</span>
-                  <p>{tool.addedOn}</p>
+                  <p>{new Date(tool.created_at).toLocaleDateString()}</p>
                 </div>
-                <div>
-                  <span className="font-semibold">Monthly Visitors:</span>
-                  <p>{tool.monthlyVisitors}</p>
-                </div>
-                <div>
-                  <span className="font-semibold">Social & Email:</span>
-                  <div className="flex gap-2 mt-2">
-                    <Mail className="w-5 h-5 text-blue-500" />
+                {tool.technologies && tool.technologies.length > 0 && (
+                  <div>
+                    <span className="font-semibold">Technologies:</span>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {tool.technologies.map((tech, index) => (
+                        <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Custom Tabs */}
           <div className="w-full">
             <div className="border-b border-gray-200">
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 overflow-x-auto">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-2 px-4 relative ${
+                    className={`py-2 px-4 relative whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'text-violet-600 border-b-2 border-violet-600'
                         : 'text-gray-600 hover:text-violet-600'
@@ -127,17 +160,15 @@ const ToolPage = ({ toolId = 1 }) => {
                   ))}
                 </div>
               )}
-              {/* Add other tab content as needed */}
             </div>
           </div>
         </div>
-
-        {/* Right Sidebar */}
         <div className="col-span-1">
           <img 
-            src="/api/placeholder/400/300" 
-            alt={tool.title}
+            src={tool.image_url || "/api/placeholder/400/300"}
+            alt={tool.name}
             className="w-full rounded-lg mb-4"
+            onError={(e) => e.target.src = "/api/placeholder/400/300"}
           />
           <div className="flex gap-2 mt-4">
             <button className="w-full bg-violet-600 text-white py-2 rounded-lg">
